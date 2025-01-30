@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1 class="neon-text">{{ user.username }}</h1>
+            <div class="profile-stats">
+                <div class="stat">
+                    <span class="stat-label">Rating</span>
+                    <span class="stat-value">{{ user.rating }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Wins</span>
+                    <span class="stat-value">{{ user.wins }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Races</span>
+                    <span class="stat-value">{{ user.races_completed }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Recent Races</h3>
+                <div class="race-history">
+                    {% for race in user.race_history[-5:] %}
+                    <div class="race-entry">
+                        <span class="race-track">{{ race.course.name }}</span>
+                        <span class="race-time">{{ "%.2f"|format(race.completion_time) }}s</span>
+                        <span class="race-position">{{ race.position }}{{ "st" if race.position == 1 else "nd" if race.position == 2 else "rd" if race.position == 3 else "th" }}</span>
+                    </div>
+                    {% else %}
+                    <p>No races yet</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Best Times</h3>
+                <div class="best-times">
+                    {% for record in user.course_records %}
+                    <div class="time-entry">
+                        <span class="track-name">{{ record.course.name }}</span>
+                        <span class="best-time">{{ "%.2f"|format(record.best_time) }}s</span>
+                    </div>
+                    {% else %}
+                    <p>No records yet</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    padding: 2rem 0;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.race-history, .best-times {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.race-entry, .time-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.race-entry:last-child, .time-entry:last-child {
+    border-bottom: none;
+}
+
+.race-track, .track-name {
+    color: var(--primary);
+}
+
+.race-time, .best-time {
+    color: var(--text-secondary);
+}
+
+.race-position {
+    color: var(--secondary);
+}
+</style>
+{% endblock %} 

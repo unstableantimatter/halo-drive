@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Space Racing - Game{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+.game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.hud-top {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.hud-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.hud-bottom {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.ship-status {
+    display: flex;
+    gap: 20px;
+}
+
+.bar-container {
+    width: 150px;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--primary);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.shield-bar .bar {
+    background: #00ffff;
+}
+
+.energy-bar .bar {
+    background: #ffff00;
+}
+
+.speed-indicator {
+    text-align: right;
+}
+
+.speed-value {
+    font-size: 24px;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
+}
+
+.boost-meter {
+    width: 100px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.countdown {
+    font-size: 72px;
+    color: var(--primary);
+    text-shadow: 0 0 20px var(--primary);
+}
+
+.message-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.message-content {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--primary);
+    text-align: center;
+}
+
+.message-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- HUD Overlay -->
+    <div class="hud">
+        <div class="hud-top">
+            <div class="player-info">
+                <span class="player-name">{{ current_user.username if current_user else 'Guest' }}</span>
+                <span class="player-position">Position: <span id="position">--</span></span>
+            </div>
+            <div class="ship-info">
+                {% if ship %}
+                <span class="ship-name">{{ ship.name }}</span>
+                {% endif %}
+            </div>
+            <div class="race-info">
+                <span class="lap-counter">Lap: <span id="currentLap">1</span>/3</span>
+                <span class="race-timer">Time: <span id="raceTime">00:00.000</span></span>
+            </div>
+        </div>
+        
+        <div class="hud-center">
+            <div id="countdown" class="countdown"></div>
+            <div id="checkpoint" class="checkpoint-indicator"></div>
+        </div>
+        
+        <div class="hud-bottom">
+            <div class="ship-status">
+                <div class="shield-bar">
+                    <div class="bar-label">Shield</div>
+                    <div class="bar-container">
+                        <div id="shieldBar" class="bar" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="energy-bar">
+                    <div class="bar-label">Energy</div>
+                    <div class="bar-container">
+                        <div id="energyBar" class="bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="speed-indicator">
+                <div class="speed-value"><span id="speed">0</span> KM/H</div>
+                <div class="boost-meter">
+                    <div id="boostBar" class="bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Messages -->
+    <div id="messageOverlay" class="message-overlay" style="display: none;">
+        <div class="message-content">
+            <h2 id="messageTitle"></h2>
+            <p id="messageText"></p>
+            <div class="message-buttons">
+                <button class="button" onclick="restartRace()">Restart</button>
+                <button class="button" onclick="returnToMenu()">Menu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/game-engine.js') }}"></script>
+<script>
+let engine;
+let gameState = {
+    started: false,
+    paused: false,
+    finished: false,
+    currentLap: 1,
+    totalLaps: 3,
+    raceTime: 0,
+    position: 0,
+    ship: {{ ship|tojson if ship else 'null' }}
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const canvas = document.getElementById('gameCanvas');
+    engine = new GameEngine(canvas);
+    
+    // Load assets
+    try {
+        await engine.loadAssets();
+        console.log('Assets loaded successfully');
+        
+        // Initialize ship if available
+        if (gameState.ship) {
+            engine.initShip(gameState.ship);
+            // Start game immediately for testing
+            startCountdown();
+        } else {
+            console.error('No ship data available:', gameState);
+        }
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
+    
+    // Handle window resize
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        if (engine.ship) {
+            engine.ship.x = canvas.width / 2;
+            engine.ship.y = canvas.height / 2;
+        }
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    // Initialize socket connection
+    const socket = io();
+    
+    socket.on('connect', () => {
+        console.log('Connected to game server');
+    });
+    
+    socket.on('game_start', (data) => {
+        startCountdown();
+    });
+});
+
+function startCountdown() {
+    const countdown = document.getElementById('countdown');
+    let count = 3;
+    
+    const interval = setInterval(() => {
+        if (count > 0) {
+            countdown.textContent = count;
+            count--;
+        } else {
+            countdown.textContent = 'GO!';
+            setTimeout(() => {
+                countdown.textContent = '';
+                startRace();
+            }, 1000);
+            clearInterval(interval);
+        }
+    }, 1000);
+}
+
+function startRace() {
+    gameState.started = true;
+    engine.start();
+    
+    // Start race timer
+    const startTime = Date.now();
+    const timerInterval = setInterval(() => {
+        if (!gameState.paused && !gameState.finished) {
+            gameState.raceTime = Date.now() - startTime;
+            updateHUD();
+        }
+    }, 10);
+}
+
+function restartRace() {
+    window.location.reload();
+}
+
+function returnToMenu() {
+    window.location.href = "{{ url_for('game.menu') }}";
+}
+
+function updateHUD() {
+    if (!engine.ship) return;
+    
+    // Update ship stats
+    document.getElementById('speed').textContent = 
+        Math.round(Math.hypot(engine.ship.velocity.x, engine.ship.velocity.y) * 10);
+    
+    document.getElementById('shieldBar').style.width = 
+        `${engine.ship.stats.shield_strength}%`;
+    
+    document.getElementById('energyBar').style.width = 
+        `${engine.ship.stats.energy_capacity}%`;
+    
+    document.getElementById('boostBar').style.width = 
+        `${engine.keys.boost ? 100 : 0}%`;
+    
+    // Format race time
+    const minutes = Math.floor(gameState.raceTime / 60000);
+    const seconds = Math.floor((gameState.raceTime % 60000) / 1000);
+    const milliseconds = gameState.raceTime % 1000;
+    document.getElementById('raceTime').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+}
+</script>
+{% endblock %} 

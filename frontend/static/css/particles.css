@@ -1,0 +1,624 @@
+/* Space Particles */
+.particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* Stars */
+.star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--twinkle-duration, 4s) infinite;
+}
+
+.star::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(255,255,255,0.8);
+    animation: starGlow var(--twinkle-duration, 4s) infinite;
+}
+
+/* Nebula Effects */
+.nebula {
+    position: absolute;
+    filter: blur(40px);
+    opacity: 0.2;
+    mix-blend-mode: screen;
+    animation: nebulaPulse 10s infinite;
+}
+
+/* Energy Fields */
+.energy-field {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0,150,255,0.1) 0%,
+        transparent 50%
+    );
+    transition: all 0.3s ease;
+    mix-blend-mode: screen;
+}
+
+/* Speed Lines */
+.speed-lines {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.speed-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    height: 1px;
+    width: var(--line-width);
+    transform: translateX(-100%);
+}
+
+/* Interactive Ripples */
+.ripple {
+    position: absolute;
+    border: 2px solid rgba(0,150,255,0.5);
+    border-radius: 50%;
+    animation: rippleEffect 1s cubic-bezier(0, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+/* Shield Effects */
+.shield-effect {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(0,150,255,0.3);
+    animation: shieldExpand 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Boost Particles */
+.boost-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.boost-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: linear-gradient(90deg, #00a8ff, transparent);
+    transform-style: preserve-3d;
+}
+
+/* Animations */
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes starGlow {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.5); opacity: 0.8; }
+}
+
+@keyframes nebulaPulse {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.2; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 0.3; }
+}
+
+@keyframes rippleEffect {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+}
+
+@keyframes shieldExpand {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Responsive Animations */
+@media (prefers-reduced-motion: reduce) {
+    .particle-container {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .star::after {
+        box-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
+    
+    .nebula {
+        filter: blur(20px);
+    }
+}
+
+/* Wormhole Effect */
+.wormhole {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(0, 150, 255, 0.2) 25%,
+        rgba(100, 0, 255, 0.3) 50%,
+        rgba(255, 0, 150, 0.2) 75%,
+        transparent
+    );
+    filter: blur(8px);
+    animation: wormholeRotate 8s linear infinite;
+    transform-style: preserve-3d;
+}
+
+.wormhole::before {
+    content: '';
+    position: absolute;
+    inset: 20%;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        transparent 100%
+    );
+}
+
+/* Plasma Field */
+.plasma-field {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        rgba(0, 150, 255, 0.1) 10px,
+        transparent 20px
+    );
+    filter: blur(4px);
+    opacity: 0.3;
+    animation: plasmaShift 10s linear infinite;
+}
+
+/* Asteroid Belt */
+.asteroid-belt {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.asteroid {
+    position: absolute;
+    background: radial-gradient(
+        circle at 30% 30%,
+        #8b8b8b,
+        #4a4a4a 60%,
+        #2d2d2d
+    );
+    border-radius: 40%;
+    opacity: 0.7;
+    animation: asteroidFloat var(--float-duration, 15s) linear infinite;
+    transform: rotate(var(--rotation, 0deg)) translateZ(var(--depth, 0px));
+}
+
+/* Ion Trail */
+.ion-trail {
+    position: absolute;
+    width: 3px;
+    height: 20px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 255, 255, 0.5),
+        transparent
+    );
+    filter: blur(1px);
+    animation: ionTrail 1s linear infinite;
+}
+
+/* Quantum Particles */
+.quantum-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 255, 255, 0.8),
+        rgba(0, 150, 255, 0.4) 50%,
+        transparent
+    );
+    border-radius: 50%;
+    animation: quantumFluctuation var(--quantum-duration, 3s) ease-in-out infinite;
+}
+
+/* Add these new keyframe animations */
+@keyframes wormholeRotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.2);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+@keyframes plasmaShift {
+    0% {
+        transform: translate(0, 0) scale(1);
+        filter: hue-rotate(0deg);
+    }
+    33% {
+        transform: translate(20px, -10px) scale(1.1);
+        filter: hue-rotate(120deg);
+    }
+    66% {
+        transform: translate(-20px, 10px) scale(0.9);
+        filter: hue-rotate(240deg);
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+        filter: hue-rotate(360deg);
+    }
+}
+
+@keyframes asteroidFloat {
+    from {
+        transform: rotate(var(--rotation)) translateZ(var(--depth)) translateX(-100vw);
+    }
+    to {
+        transform: rotate(var(--rotation)) translateZ(var(--depth)) translateX(100vw);
+    }
+}
+
+@keyframes ionTrail {
+    0% {
+        transform: translateY(-100%) scaleY(1);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(0) scaleY(1.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100%) scaleY(1);
+        opacity: 0;
+    }
+}
+
+@keyframes quantumFluctuation {
+    0%, 100% {
+        transform: scale(0.5) translate(0, 0);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.5) translate(var(--quantum-x), var(--quantum-y));
+        opacity: 0.8;
+    }
+}
+
+/* Add these new styles */
+
+/* Collision Effects */
+.collision-spark {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: sparkExplosion 0.5s ease-out forwards;
+    transform-origin: center;
+}
+
+.collision-wave {
+    position: absolute;
+    border: 2px solid rgba(0, 150, 255, 0.3);
+    border-radius: 50%;
+    animation: collisionWave 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.shield-impact {
+    position: absolute;
+    background: radial-gradient(circle at center,
+        rgba(0, 150, 255, 0.6),
+        transparent 70%
+    );
+    border-radius: 50%;
+    animation: shieldImpact 0.5s ease-out forwards;
+}
+
+/* Emission Patterns */
+.emission-spiral {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    animation: spiralRotate 10s linear infinite;
+}
+
+.emission-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle at center,
+        rgba(0, 255, 255, 0.8),
+        transparent 80%
+    );
+    border-radius: 50%;
+    transform-origin: center;
+}
+
+.emission-burst {
+    position: absolute;
+    animation: burstExpand 1s ease-out forwards;
+}
+
+/* Add these new keyframe animations */
+@keyframes sparkExplosion {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+@keyframes collisionWave {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+    }
+}
+
+@keyframes shieldImpact {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes spiralRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes burstExpand {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Add to existing particles.css */
+
+.physics-particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform-origin: center;
+    will-change: transform;
+}
+
+.physics-particle.trail {
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.physics-particle.gravity-well {
+    background: radial-gradient(
+        circle at center,
+        rgba(0, 150, 255, 0.2),
+        transparent 70%
+    );
+    animation: pulseWell 2s ease-in-out infinite;
+}
+
+@keyframes pulseWell {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.2); opacity: 0.3; }
+}
+
+/* Add these new race-specific effects */
+
+/* Checkpoint Effects */
+.checkpoint-ring {
+    position: absolute;
+    border: 4px solid rgba(0, 255, 200, 0.6);
+    border-radius: 50%;
+    animation: checkpointPulse 2s infinite;
+}
+
+.checkpoint-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.checkpoint-spark {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: linear-gradient(to right, #00ffcc, transparent);
+    border-radius: 50%;
+    animation: checkpointSparkle 1s ease-out forwards;
+}
+
+/* Boost Pad Effects */
+.boost-pad {
+    position: absolute;
+    width: 100px;
+    height: 20px;
+    background: linear-gradient(90deg, 
+        rgba(0, 255, 255, 0.1),
+        rgba(0, 255, 255, 0.3) 50%,
+        rgba(0, 255, 255, 0.1)
+    );
+    animation: boostPadPulse 1.5s infinite;
+}
+
+/* Finish Line Effects */
+.finish-line-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.victory-spark {
+    position: absolute;
+    background: radial-gradient(circle at center,
+        rgba(255, 215, 0, 0.8),
+        transparent 80%
+    );
+    border-radius: 50%;
+    animation: victorySparkle 2s ease-out infinite;
+}
+
+/* Race Position Indicator */
+.position-change {
+    position: absolute;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    animation: positionChange 1s ease-out forwards;
+}
+
+/* New Keyframes */
+@keyframes checkpointPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+@keyframes checkpointSparkle {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+@keyframes boostPadPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scaleX(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scaleX(1.1);
+    }
+}
+
+@keyframes victorySparkle {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes positionChange {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Add quality-dependent styles */
+
+/* Glow effects class */
+.particle-container.glow-effects .star::after {
+    box-shadow: 0 0 20px rgba(255,255,255,0.8);
+}
+
+.particle-container.glow-effects .emission-particle {
+    filter: drop-shadow(0 0 5px rgba(0,255,255,0.5));
+}
+
+.particle-container.glow-effects .checkpoint-spark {
+    filter: drop-shadow(0 0 3px rgba(0,255,200,0.6));
+}
+
+/* Quality-specific media queries */
+@media (max-width: 768px) {
+    .particle-container {
+        --particle-density: 0.6;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .particle-container {
+        --animation-speed: 1.5;
+    }
+}
+
+/* Performance optimizations */
+.particle-container * {
+    backface-visibility: hidden;
+    perspective: 1000;
+    transform: translateZ(0);
+}
+
+.high-performance {
+    will-change: transform, opacity;
+} 

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Space Racing{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <h1 class="neon-text">Create Account</h1>
+        
+        <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form" id="register-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required 
+                       minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" 
+                       title="Username can only contain letters, numbers, and underscores">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required
+                       minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                       title="Must contain at least one number, one uppercase and lowercase letter, and be at least 8 characters long">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" class="form-control" required>
+                <div class="password-match-indicator"></div>
+            </div>
+            
+            <div class="password-requirements">
+                <p>Password must contain:</p>
+                <ul>
+                    <li id="length">At least 8 characters</li>
+                    <li id="uppercase">One uppercase letter</li>
+                    <li id="lowercase">One lowercase letter</li>
+                    <li id="number">One number</li>
+                </ul>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="button">Create Account</button>
+            </div>
+            
+            <div class="auth-links">
+                <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="neon-link">Login</a></p>
+            </div>
+        </form>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+</div>
+
+<style>
+.auth-page {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.auth-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem;
+    background: rgba(26, 26, 63, 0.8);
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Orbitron', sans-serif;
+}
+
+.form-control:focus {
+    outline: none;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.password-requirements {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.password-requirements li {
+    color: var(--text-secondary);
+    margin: 0.3rem 0;
+}
+
+.password-requirements li.valid {
+    color: var(--success);
+}
+
+.password-requirements li.valid::before {
+    content: '✓';
+    margin-right: 0.5rem;
+}
+
+.password-match-indicator {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--error);
+}
+
+.password-match-indicator.match {
+    background: var(--success);
+}
+
+/* Rest of the styles from login.html */
+</style>
+
+<script>
+const form = document.getElementById('register-form');
+const password = document.getElementById('password');
+const confirmPassword = document.getElementById('confirm-password');
+const requirements = {
+    length: document.getElementById('length'),
+    uppercase: document.getElementById('uppercase'),
+    lowercase: document.getElementById('lowercase'),
+    number: document.getElementById('number')
+};
+
+function validatePassword() {
+    const pwd = password.value;
+    
+    // Check each requirement
+    requirements.length.classList.toggle('valid', pwd.length >= 8);
+    requirements.uppercase.classList.toggle('valid', /[A-Z]/.test(pwd));
+    requirements.lowercase.classList.toggle('valid', /[a-z]/.test(pwd));
+    requirements.number.classList.toggle('valid', /\d/.test(pwd));
+}
+
+function checkPasswordMatch() {
+    const matchIndicator = document.querySelector('.password-match-indicator');
+    matchIndicator.classList.toggle('match', 
+        password.value && password.value === confirmPassword.value);
+}
+
+password.addEventListener('input', validatePassword);
+confirmPassword.addEventListener('input', checkPasswordMatch);
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.style.display = 'none';
+    
+    if (password.value !== confirmPassword.value) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    const formData = {
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        password: password.value
+    };
+    
+    try {
+        const response = await fetch('{{ url_for("auth.register") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            window.location.href = '{{ url_for("auth.login") }}';
+        } else {
+            errorDiv.textContent = data.error || 'Registration failed';
+            errorDiv.style.display = 'block';
+            
+            const container = document.querySelector('.auth-container');
+            container.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                container.style.animation = '';
+            }, 500);
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
+{% endblock %} 

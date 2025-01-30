@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Space Racing{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <div class="hero">
+        <h1 class="neon-text">Space Racing</h1>
+        <p class="hero-text">Experience high-speed racing through space</p>
+        
+        <div class="cta-buttons">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('game.menu') }}" class="button">Play Now</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="button">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="button button-secondary">Register</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="features grid">
+        <div class="feature-card card">
+            <h3>Race in Space</h3>
+            <p>Navigate through challenging space tracks with unique gravity mechanics</p>
+        </div>
+        <div class="feature-card card">
+            <h3>Multiple Ships</h3>
+            <p>Choose from various ships with different stats and abilities</p>
+        </div>
+        <div class="feature-card card">
+            <h3>Global Rankings</h3>
+            <p>Compete with players worldwide and climb the leaderboard</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.landing-container {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.hero {
+    margin-bottom: 4rem;
+}
+
+.hero h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.hero-text {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.button-secondary {
+    border-color: var(--secondary);
+    color: var(--secondary);
+}
+
+.button-secondary:hover {
+    background: var(--secondary);
+}
+
+.feature-card {
+    text-align: left;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %} 

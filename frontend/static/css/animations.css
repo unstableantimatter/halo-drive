@@ -1,0 +1,267 @@
+/* Global animation classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-in {
+    animation: zoomIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.warp-in {
+    animation: warpIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes warpIn {
+    0% {
+        transform: scale(0, 2);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2, 0.8);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Interactive elements */
+.button-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+/* Particle effects */
+.space-particles {
+    position: absolute;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, 
+        rgba(74, 144, 226, 0.1) 0%,
+        transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+}
+
+/* Responsive animation durations */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .fade-in, .slide-in, .zoom-in {
+        animation-duration: 0.3s;
+    }
+    
+    .warp-in {
+        animation-duration: 0.5s;
+    }
+}
+
+/* Performance optimizations */
+.hardware-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Responsive scales */
+@media screen and (min-width: 1920px) {
+    .zoom-in {
+        animation-name: zoomInLarge;
+    }
+    
+    @keyframes zoomInLarge {
+        from {
+            transform: scale(0.3);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .slide-in {
+        animation-name: slideInMobile;
+    }
+    
+    @keyframes slideInMobile {
+        from {
+            transform: translateX(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+}
+
+/* Battery-saving dark mode animations */
+@media (prefers-color-scheme: dark) {
+    .space-particles {
+        opacity: 0.7;
+        background: radial-gradient(circle at center, 
+            rgba(74, 144, 226, 0.05) 0%,
+            transparent 60%);
+    }
+}
+
+/* Reduced animation complexity for low-power mode */
+@media (any-pointer: coarse) and (max-width: 768px) {
+    .space-particles {
+        animation: simplePulse 5s ease-in-out infinite;
+    }
+    
+    @keyframes simplePulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.5; }
+    }
+}
+
+/* High refresh rate screens */
+@media (min-resolution: 2dppx) {
+    .button-hover {
+        transition-duration: 0.2s;
+    }
+}
+
+/* Save GPU for mobile */
+@media (max-width: 768px) {
+    .hardware-accelerated {
+        transform: none;
+        backface-visibility: visible;
+        perspective: none;
+    }
+}
+
+/* Adaptive blur effects */
+@supports (backdrop-filter: blur(10px)) {
+    .modal-background {
+        backdrop-filter: blur(10px);
+    }
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+    .modal-background {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* Space-themed Keyframes */
+@keyframes starPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes nebulaDrift {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes warpIn {
+    0% { 
+        transform: scale(0, 2);
+        opacity: 0;
+        filter: blur(20px);
+    }
+    50% { 
+        transform: scale(1.2, 0.8);
+        opacity: 0.5;
+        filter: blur(10px);
+    }
+    100% { 
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@keyframes warpOut {
+    0% { 
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
+    50% { 
+        transform: scale(1.2, 0.8);
+        opacity: 0.5;
+        filter: blur(10px);
+    }
+    100% { 
+        transform: scale(2, 0);
+        opacity: 0;
+        filter: blur(20px);
+    }
+}
+
+@keyframes shieldPulse {
+    0% { 
+        box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+        border-color: rgba(0, 150, 255, 0.5);
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(0, 150, 255, 0.6);
+        border-color: rgba(0, 150, 255, 0.8);
+    }
+    100% { 
+        box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+        border-color: rgba(0, 150, 255, 0.5);
+    }
+}
+
+@keyframes thrusterGlow {
+    0% { filter: drop-shadow(0 0 5px rgba(255, 100, 0, 0.5)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 100, 0, 0.8)); }
+    100% { filter: drop-shadow(0 0 5px rgba(255, 100, 0, 0.5)); }
+} 

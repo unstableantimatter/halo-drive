@@ -1,0 +1,54 @@
+/* Z-index management */
+:root {
+    --z-particles: 0;
+    --z-content: 10;
+    --z-nav: 100;
+    --z-modal: 1000;
+}
+
+#particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-particles);
+    pointer-events: none;
+}
+
+.nav {
+    position: relative;
+    z-index: var(--z-nav);
+}
+
+.nav-list, .nav-item, .nav-link {
+    position: relative;
+    z-index: var(--z-nav);
+}
+
+.container, 
+.auth-page,
+.menu-page,
+.landing-container {
+    position: relative;
+    z-index: var(--z-content);
+}
+
+.button,
+.card,
+.auth-form,
+.form-control,
+.auth-links,
+.menu-section,
+.ship-card,
+.mode-card,
+.setting-control {
+    position: relative;
+    z-index: var(--z-content);
+}
+
+.modal,
+.dialog {
+    position: fixed;
+    z-index: var(--z-modal);
+} 

@@ -1,0 +1,38 @@
+# Core Framework
+Flask>=2.0.1
+Flask-SocketIO>=5.1.1
+Flask-SQLAlchemy>=2.5.1
+Flask-Login>=0.5.0
+Flask-Migrate>=3.1.0
+Werkzeug<3.0.0  # Add specific version for compatibility
+
+# Database
+SQLAlchemy>=1.4.23
+
+# Game Physics & Math
+numpy>=1.21.2
+scipy>=1.10.0
+numba>=0.56.0
+cupy-cuda12x>=13.0.0  # For CUDA 12.7
+
+# Networking
+eventlet>=0.30.2
+python-socketio>=5.4.0
+requests>=2.26.0
+
+# Asset Processing
+Pillow>=9.0.0
+imageio>=2.25.0
+
+# Development & Testing
+pytest>=6.2.5
+black>=21.8b0
+flake8>=3.9.2
+python-dotenv>=0.19.0
+
+# Performance Monitoring
+prometheus-client>=0.11.0
+statsd>=3.3.0
+
+# Scheduler
+Flask-APScheduler==1.12.3 

@@ -1,0 +1,582 @@
+{% extends "base.html" %}
+
+{% block title %}Menu - Space Racing{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+    <div class="menu-header">
+        <h1 class="neon-text">Space Racing</h1>
+        <div class="player-stats">
+            <div class="stat">
+                <span class="stat-label">Player</span>
+                <span class="stat-value">{{ user.username }}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Rating</span>
+                <span class="stat-value">{{ user.rating or 1000 }}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Rank</span>
+                <span class="stat-value">#{{ global_ranking or '?' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ship Selection Row -->
+    <div class="menu-section ships-section">
+        <h2>Select Your Ship</h2>
+        <div class="ship-carousel">
+            {% for ship in ships %}
+            <div class="ship-card {% if current_user.rating < ship.required_rating %}locked{% endif %}" 
+                 onclick="selectShip('{{ ship.id }}')">
+                <div class="ship-preview">
+                    <img src="{{ url_for('static', filename='assets/ships/' + ship.sprite_key) }}" 
+                         alt="{{ ship.name }}"
+                         onerror="this.src='{{ url_for('static', filename='assets/ships/default_ship.png') }}'">
+                </div>
+                <div class="ship-info">
+                    <h3>{{ ship.name }}</h3>
+                    <p class="ship-description">{{ ship.description }}</p>
+                    <div class="ship-stats">
+                        <div class="stat-bar">
+                            <span>Speed</span>
+                            <div class="bar" style="width: {{ ship.stats.max_speed }}%"></div>
+                        </div>
+                        <div class="stat-bar">
+                            <span>Acceleration</span>
+                            <div class="bar" style="width: {{ ship.stats.acceleration }}%"></div>
+                        </div>
+                        <div class="stat-bar">
+                            <span>Handling</span>
+                            <div class="bar" style="width: {{ ship.stats.handling }}%"></div>
+                        </div>
+                        <div class="stat-bar">
+                            <span>Shield</span>
+                            <div class="bar" style="width: {{ ship.stats.shield_strength }}%"></div>
+                        </div>
+                        <div class="stat-bar">
+                            <span>Energy</span>
+                            <div class="bar" style="width: {{ ship.stats.energy_capacity }}%"></div>
+                        </div>
+                    </div>
+                    {% if current_user.rating < ship.required_rating %}
+                    <div class="ship-locked">
+                        <span class="lock-icon">🔒</span>
+                        <span>Required Rating: {{ ship.required_rating }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Game Options Row -->
+    <div class="menu-grid">
+        <!-- Quick Play Section -->
+        <div class="menu-section card">
+            <h2>Quick Play</h2>
+            <div class="quick-play-options">
+                <button class="button primary-button" onclick="startSinglePlayer()">Single Player</button>
+                <button class="button" onclick="showMatchmaking('ranked')">Ranked Match</button>
+                <button class="button" onclick="showMatchmaking('casual')">Casual Match</button>
+            </div>
+        </div>
+
+        <!-- Custom Game Section -->
+        <div class="menu-section card">
+            <h2>Custom Game</h2>
+            <div class="custom-game-options">
+                <button class="button primary-button" onclick="createLobby()">Create Lobby</button>
+                <button class="button" onclick="showLobbyBrowser()">Join Lobby</button>
+                <button class="button" onclick="showPrivateLobby()">Private Match</button>
+            </div>
+        </div>
+
+        <!-- Game Modes Section -->
+        <div class="menu-section card">
+            <h2>Game Modes</h2>
+            <div class="mode-selection">
+                <div class="mode-card" onclick="selectMode('time-trial')">
+                    <h3>Time Trial</h3>
+                    <p>Race against the clock</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('elimination')">
+                    <h3>Elimination</h3>
+                    <p>Last ship flying wins</p>
+                </div>
+                <div class="mode-card" onclick="selectMode('checkpoint')">
+                    <h3>Checkpoint Race</h3>
+                    <p>Classic racing</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="menu-section card">
+            <h2>Settings</h2>
+            <div class="settings-grid">
+                <div class="setting-group">
+                    <h3>Graphics</h3>
+                    <div class="setting-control">
+                        <label for="quality">Quality</label>
+                        <select id="quality" class="form-control">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="setting-control">
+                        <label for="particles">Particle Effects</label>
+                        <input type="checkbox" id="particles" checked>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h3>Audio</h3>
+                    <div class="setting-control">
+                        <label for="music">Music</label>
+                        <input type="range" id="music" min="0" max="100" value="80">
+                    </div>
+                    <div class="setting-control">
+                        <label for="sfx">SFX</label>
+                        <input type="range" id="sfx" min="0" max="100" value="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.menu-page {
+    padding: 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+    min-height: calc(100vh - 60px);
+}
+
+.menu-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.ships-section {
+    margin-bottom: 2rem;
+}
+
+.ship-carousel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.menu-section {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.menu-section h2 {
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.ship-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ship-preview {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.ship-preview img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.button {
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 4px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    transition: all 0.2s ease;
+}
+
+.primary-button {
+    background: var(--primary);
+    color: var(--surface);
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px var(--primary);
+}
+
+.mode-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.setting-group {
+    margin-bottom: 1.5rem;
+}
+
+.setting-control {
+    margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .menu-page {
+        padding: 1rem;
+    }
+    
+    .ship-carousel {
+        grid-template-columns: 1fr;
+    }
+    
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.player-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* Add back interactive styles */
+.ship-card {
+    cursor: pointer;
+}
+
+.ship-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--primary);
+}
+
+.ship-card.selected {
+    border-color: #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+.ship-card.locked {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.ship-info h3 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+}
+
+.ship-description {
+    font-size: 0.9em;
+    margin-bottom: 15px;
+    color: #aaa;
+}
+
+.ship-locked {
+    margin-top: 10px;
+    text-align: center;
+    color: #ff4444;
+}
+
+.lock-icon {
+    margin-right: 5px;
+}
+
+.stat-bar {
+    margin-bottom: 5px;
+}
+
+.stat-bar span {
+    display: inline-block;
+    width: 100px;
+    font-size: 0.9em;
+}
+
+/* Mode card styles */
+.mode-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px var(--primary);
+}
+
+.mode-card.selected {
+    border-color: #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+/* Settings styles */
+.setting-control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.setting-control label {
+    flex: 1;
+}
+
+.form-control {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* Add matchmaking status back */
+.matchmaking-status {
+    margin-top: 1rem;
+    text-align: center;
+    display: none;
+}
+
+.searching-animation {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Ensure all interactive elements have proper feedback */
+.button,
+.mode-card,
+.ship-card,
+.setting-control,
+.form-control {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Add modal styles back */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: var(--z-modal);
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+</style>
+
+<script>
+let matchmakingInterval;
+
+function showMatchmaking(type) {
+    document.getElementById('matchmaking-status').style.display = 'block';
+    
+    fetch('/api/matchmaking/join', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'queued') {
+            matchmakingInterval = setInterval(checkMatchmakingStatus, 2000);
+        }
+    });
+}
+
+function checkMatchmakingStatus() {
+    fetch('/api/matchmaking/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'match_found') {
+                clearInterval(matchmakingInterval);
+                window.location.href = `/play?game=${data.game_id}`;
+            }
+        });
+}
+
+function cancelMatchmaking() {
+    clearInterval(matchmakingInterval);
+    document.getElementById('matchmaking-status').style.display = 'none';
+    // Add API call to cancel matchmaking
+}
+
+// Save settings to localStorage
+function updateGraphics() {
+    const settings = {
+        quality: document.getElementById('quality').value,
+        particles: document.getElementById('particles').checked
+    };
+    localStorage.setItem('graphicsSettings', JSON.stringify(settings));
+}
+
+// Load settings on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const settings = JSON.parse(localStorage.getItem('graphicsSettings')) || {
+        quality: 'medium',
+        particles: true
+    };
+    
+    document.getElementById('quality').value = settings.quality;
+    document.getElementById('particles').checked = settings.particles;
+    
+    // Add click event listeners
+    document.querySelectorAll('.button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            // Add click animation
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 100);
+        });
+    });
+});
+
+function startSinglePlayer() {
+    window.location.href = "{{ url_for('game.play') }}?mode=single";
+}
+
+function createLobby() {
+    fetch("{{ url_for('game.create_lobby') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.lobby_id) {
+            window.location.href = `{{ url_for('game.lobby') }}?id=${data.lobby_id}`;
+        }
+    })
+    .catch(error => console.error('Error creating lobby:', error));
+}
+
+function showLobbyBrowser() {
+    window.location.href = "{{ url_for('game.lobbies') }}";
+}
+
+function showPrivateLobby() {
+    const lobbyCode = prompt('Enter lobby code:');
+    if (lobbyCode) {
+        window.location.href = `{{ url_for('game.lobby') }}?code=${lobbyCode}`;
+    }
+}
+
+function selectMode(mode) {
+    // Store selected mode
+    localStorage.setItem('selectedMode', mode);
+    
+    // Update UI to show selection
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+}
+
+function selectShip(shipId) {
+    const card = event.currentTarget;
+    if (card.classList.contains('locked')) {
+        return;
+    }
+    
+    // Remove selection from other ships
+    document.querySelectorAll('.ship-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selection to clicked ship
+    card.classList.add('selected');
+    
+    // Store selection
+    localStorage.setItem('selectedShip', shipId);
+}
+
+// Load previous selection
+document.addEventListener('DOMContentLoaded', () => {
+    const selectedShip = localStorage.getItem('selectedShip');
+    if (selectedShip) {
+        const shipCard = document.querySelector(`.ship-card[onclick*="${selectedShip}"]`);
+        if (shipCard && !shipCard.classList.contains('locked')) {
+            shipCard.classList.add('selected');
+        }
+    }
+});
+</script>
+
+<!-- Add matchmaking status div back -->
+<div id="matchmaking-status" class="matchmaking-status">
+    <div class="searching-animation"></div>
+    <p>Searching for players...</p>
+    <button class="button button-secondary" onclick="cancelMatchmaking()">Cancel</button>
+</div>
+{% endblock %} 

@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Space Racing{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <h1 class="neon-text">Login</h1>
+        
+        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="button">Login</button>
+            </div>
+            
+            <div class="auth-links">
+                <p>Don't have an account? <a href="{{ url_for('auth.register') }}" class="neon-link">Register</a></p>
+            </div>
+        </form>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+</div>
+
+<style>
+.auth-page {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.auth-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem;
+    background: rgba(26, 26, 63, 0.8);
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Orbitron', sans-serif;
+}
+
+.form-control:focus {
+    outline: none;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.button {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+.neon-link {
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.neon-link:hover {
+    text-shadow: 0 0 5px var(--primary);
+}
+
+.auth-links {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.error-message {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: rgba(255, 51, 51, 0.2);
+    border: 1px solid var(--error);
+    border-radius: 4px;
+    color: var(--error);
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Ensure particle container doesn't block interactions */
+#particle-container {
+    pointer-events: none;
+}
+</style>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.style.display = 'none';
+    
+    const formData = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value
+    };
+    
+    try {
+        const response = await fetch('{{ url_for("auth.login") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            window.location.href = '{{ url_for("game.menu") }}';
+        } else {
+            errorDiv.textContent = data.error || 'Login failed';
+            errorDiv.style.display = 'block';
+            
+            const form = document.querySelector('.auth-container');
+            form.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                form.style.animation = '';
+            }, 500);
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
+{% endblock %} 

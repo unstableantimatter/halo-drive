@@ -1,0 +1,43 @@
+# Database
+backend/database/*.db
+backend/database/*.db-journal
+!backend/utils/__init__.py
+!backend/utils/backup.py
+!backend/utils/db_utils.py
+!backend/utils/db_optimizations.py
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db 
